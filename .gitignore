@@ -3,8 +3,14 @@ __pycache__/
 *.py[oc]
 build/
 dist/
+data/
 wheels/
+*.code-workspace
 *.egg-info
+*.csv
+*.png
+*.xlsx
+
 
 # Virtual environments
 .venv
