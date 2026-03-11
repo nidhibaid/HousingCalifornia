@@ -18,8 +18,18 @@ other_avg = other_means.mean()
 
 # Plotting the mean house prices
 plt.figure(figsize=(12, 6))
-plt.bar(bay_area_means.index, bay_area_means.values, label='Bay Area Counties')
-plt.bar(['Other Counties Average'], [other_avg], color='orange')
+bars1 = plt.bar(bay_area_means.index, bay_area_means.values, label='Bay Area Counties')
+bars2 = plt.bar(['Other Counties Average'], [other_avg], color='orange')
+
+for bar in bars1:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2., height,
+            f'${height:,.0f}', ha='center', va='bottom')
+
+for bar in bars2:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2., height,
+            f'${height:,.0f}', ha='center', va='bottom')
 plt.title("Mean House Prices by County")
 plt.xlabel("County")
 plt.ylabel("Mean House Prices ($)")
