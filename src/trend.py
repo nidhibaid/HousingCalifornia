@@ -4,20 +4,26 @@ from sklearn.metrics import mean_absolute_error, r2_score
 import config as cg
 import numpy as np
 
-data = cg.median_prices_dataset
-df = pd.read_excel(data, sheet_name="Median Price", header=7)
+def read_data():
+    data = cg.median_prices_dataset
+    df = pd.read_excel(data, sheet_name="Median Price", header=7)
+    return df
 
-for county in cg.bay_area_counties:
-    nan_count = df[county].isna().sum()
-    if nan_count > 0:
-        print(f"{county}: {nan_count} NaN values")
-        
 
-df['Mon-Yr'] = pd.to_datetime(df['Mon-Yr'], format='%b-%y')
-df['Mon-Yr'] = df['Mon-Yr'].map(lambda x: x.toordinal())
-location_dict = {}
-for county in cg.bay_area_counties:
-    
+def get_nan_counts(df):
+    for county in cg.bay_area_counties:
+        nan_count = df[county].isna().sum()
+        if nan_count > 0:
+            print(f"{county}: {nan_count} NaN values")
+    return None
+
+def format_data(df):
+    df['Mon-Yr'] = pd.to_datetime(df['Mon-Yr'], format='%b-%y')
+    df['Mon-Yr'] = df['Mon-Yr'].map(lambda x: x.toordinal())
+    return df
+
+
+def fit_liner_regression(df, county):
     X = df['Mon-Yr'].values.reshape(-1, 1)
     #option 1: fill NaN values with mean
     y = df[county].fillna(df[county].mean()).values
@@ -46,10 +52,17 @@ for county in cg.bay_area_counties:
     
     mean = np.mean(y)
     
-    # Store each location - gradient pairs into dictionary
-    location_dict[county] = (slope,mape,mean,r2)
-lr_df = pd.DataFrame(location_dict).transpose()
-lr_df = lr_df.rename(columns = {0:'gradient',1:'mae',2:'mean',3:'r2_score'})
-lr_df['mape'] = lr_df['mae']/lr_df['mean']
+    return slope, mape, mean, r2
 
-print(lr_df)
+if __name__ == "__main__":
+    median_df = format_data(read_data())
+    get_nan_counts(median_df)
+
+    location_dict = {}
+    for county in cg.bay_area_counties:
+        location_dict[county] = fit_liner_regression(median_df, county)
+    lr_df = pd.DataFrame(location_dict).transpose()
+    lr_df = lr_df.rename(columns = {0:'gradient',1:'mae',2:'mean',3:'r2_score'})
+    lr_df['mape'] = lr_df['mae']/lr_df['mean']
+
+    print(lr_df)
